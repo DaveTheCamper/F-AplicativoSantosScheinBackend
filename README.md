@@ -90,8 +90,8 @@ GET http://localhost:8080/api/health
 Endpoints planejados para as próximas etapas:
 
 ```http
-POST /api/auth/register
-POST /api/auth/login
+POST /auth/register
+POST /auth/login
 GET  /api/users/me
 GET  /api/reservations/me/next
 GET  /api/reservations/available-days?year=2026&month=7

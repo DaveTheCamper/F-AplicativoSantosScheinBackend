@@ -52,6 +52,28 @@ public class UserEntity {
     protected UserEntity() {
     }
 
+    public UserEntity(
+            Long id,
+            String firstName,
+            String lastName,
+            LocalDate birthDate,
+            String document,
+            String email,
+            String passwordHash,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.document = document;
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     public Long getId() {
         return id;
     }
