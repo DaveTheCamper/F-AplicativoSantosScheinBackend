@@ -15,6 +15,7 @@ class JpaReservationSlotRepositoryTest {
                 "src/main/java/br/com/santosschein/complexo/infrastructure/persistence/repository/JpaReservationSlotRepository.java"
         ));
 
+        assertThat(source).contains("TO_CHAR(available_days.day_value, 'YYYY-MM-DD')");
         assertThat(source).contains("r.status = 'ACTIVE'");
         assertThat(source).doesNotContain("r.status <> 'CANCELED'");
     }

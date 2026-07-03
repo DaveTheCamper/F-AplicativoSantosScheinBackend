@@ -24,7 +24,10 @@ public class ReservationSlotRepositoryAdapter implements ReservationSlotReposito
 
     @Override
     public List<LocalDate> findAvailableDaysBetween(LocalDate monthStart, LocalDate monthEnd) {
-        return jpaReservationSlotRepository.findAvailableDaysBetween(monthStart, monthEnd);
+        return jpaReservationSlotRepository.findAvailableDaysBetween(monthStart, monthEnd)
+                .stream()
+                .map(LocalDate::parse)
+                .toList();
     }
 
     @Override

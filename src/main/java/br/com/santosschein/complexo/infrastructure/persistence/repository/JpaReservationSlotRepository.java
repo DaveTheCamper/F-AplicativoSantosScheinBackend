@@ -13,7 +13,7 @@ public interface JpaReservationSlotRepository extends JpaRepository<ReservationS
 
     @Query(
             value = """
-                    SELECT available_days.day_value
+                    SELECT TO_CHAR(available_days.day_value, 'YYYY-MM-DD')
                     FROM (
                         SELECT TRUNC(:monthStart) + LEVEL - 1 AS day_value
                         FROM dual
@@ -38,7 +38,7 @@ public interface JpaReservationSlotRepository extends JpaRepository<ReservationS
                     """,
             nativeQuery = true
     )
-    List<LocalDate> findAvailableDaysBetween(
+    List<String> findAvailableDaysBetween(
             @Param("monthStart") LocalDate monthStart,
             @Param("monthEnd") LocalDate monthEnd
     );
