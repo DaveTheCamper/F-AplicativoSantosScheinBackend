@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestControllerAdvice
@@ -23,7 +22,7 @@ public class GlobalExceptionHandler {
             BusinessException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -31,7 +30,7 @@ public class GlobalExceptionHandler {
             InvalidCredentialsException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "E-mail ou senha invalidos.", request.getRequestURI());
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
@@ -39,7 +38,7 @@ public class GlobalExceptionHandler {
             UserAlreadyExistsException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ReservationUnavailableException.class)
@@ -47,7 +46,7 @@ public class GlobalExceptionHandler {
             ReservationUnavailableException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -55,7 +54,7 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)
@@ -63,7 +62,7 @@ public class GlobalExceptionHandler {
             ForbiddenOperationException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage(), request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.FORBIDDEN, "Sem permissao.", request.getRequestURI());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -71,7 +70,7 @@ public class GlobalExceptionHandler {
             DataIntegrityViolationException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.CONFLICT, "Conflito de dados.", request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.CONFLICT, "Conflito de dados.", request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -85,7 +84,8 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
 
-        return buildResponse(HttpStatus.BAD_REQUEST, "Dados invalidos.", request.getRequestURI(), details);
+        String message = details.isEmpty() ? "Dados invalidos." : String.join("; ", details);
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException exception,
             HttpServletRequest request
     ) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Corpo da requisicao invalido.", request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.BAD_REQUEST, "Corpo da requisicao invalido.", request.getRequestURI());
     }
 
     @ExceptionHandler({
@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException.class
     })
     public ResponseEntity<ErrorResponse> handleInvalidRequestParameter(Exception exception, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Parametro de requisicao invalido.", request.getRequestURI(), List.of());
+        return buildResponse(HttpStatus.BAD_REQUEST, "Parametro de requisicao invalido.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
@@ -109,24 +109,21 @@ public class GlobalExceptionHandler {
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Erro interno inesperado.",
-                request.getRequestURI(),
-                List.of()
+                request.getRequestURI()
         );
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(
             HttpStatus status,
             String message,
-            String path,
-            List<String> details
+            String path
     ) {
         ErrorResponse response = new ErrorResponse(
-                OffsetDateTime.now(),
                 status.value(),
                 status.getReasonPhrase(),
                 message,
                 path,
-                details
+                java.time.OffsetDateTime.now()
         );
 
         return ResponseEntity.status(status).body(response);

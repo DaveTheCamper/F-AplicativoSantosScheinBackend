@@ -1,11 +1,13 @@
 package br.com.santosschein.complexo.security;
 
 import br.com.santosschein.complexo.application.service.TokenService;
+import br.com.santosschein.complexo.shared.exception.ApiErrorResponseWriter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,10 +25,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
+    private final ApiErrorResponseWriter apiErrorResponseWriter;
 
-    public JwtAuthenticationFilter(TokenService tokenService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(
+            TokenService tokenService,
+            UserDetailsService userDetailsService,
+            ApiErrorResponseWriter apiErrorResponseWriter
+    ) {
         this.tokenService = tokenService;
         this.userDetailsService = userDetailsService;
+        this.apiErrorResponseWriter = apiErrorResponseWriter;
     }
 
     @Override
@@ -49,7 +57,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authenticateRequest(request, token);
             }
         } catch (RuntimeException exception) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            apiErrorResponseWriter.write(
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    "Sessao expirada ou token invalido.",
+                    request.getRequestURI()
+            );
             return;
         }
 

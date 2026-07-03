@@ -1,9 +1,10 @@
 package br.com.santosschein.complexo.security;
 
-import jakarta.servlet.http.HttpServletResponse;
+import br.com.santosschein.complexo.shared.exception.ApiErrorResponseWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,9 +17,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ApiErrorResponseWriter apiErrorResponseWriter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ApiErrorResponseWriter apiErrorResponseWriter
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.apiErrorResponseWriter = apiErrorResponseWriter;
     }
 
     @Bean
@@ -28,9 +34,24 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                        (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                ))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                apiErrorResponseWriter.write(
+                                        response,
+                                        HttpStatus.UNAUTHORIZED,
+                                        "Sessao expirada ou token invalido.",
+                                        request.getRequestURI()
+                                )
+                        )
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                apiErrorResponseWriter.write(
+                                        response,
+                                        HttpStatus.FORBIDDEN,
+                                        "Sem permissao.",
+                                        request.getRequestURI()
+                                )
+                        )
+                )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .anyRequest().authenticated()
