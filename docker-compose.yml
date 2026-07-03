@@ -18,7 +18,7 @@ services:
       start_period: 40s
 
   flyway:
-    image: redgate/flyway:10
+    image: flyway/flyway:9.22.3
     container_name: complexo-santos-schein-flyway
     depends_on:
       oracle:
@@ -30,7 +30,7 @@ services:
       FLYWAY_CONNECT_RETRIES: 60
     volumes:
       - ./src/main/resources/db/migration:/flyway/sql:ro
-      - ./docker/flyway/drivers:/flyway/drivers:ro
+      - ./docker/flyway/drivers/ojdbc11.jar:/flyway/drivers/ojdbc11.jar:ro
     command: migrate
 
 volumes:

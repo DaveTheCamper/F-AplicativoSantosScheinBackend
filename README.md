@@ -32,10 +32,10 @@ src/main/java/br/com/santosschein/complexo
 
 ## Subir o Oracle local
 
-Na raiz do projeto:
+Na raiz do projeto, suba o Oracle:
 
 ```powershell
-docker compose up oracle flyway
+docker compose up -d oracle
 ```
 
 O banco fica disponível em:
@@ -52,7 +52,13 @@ As tabelas são criadas exclusivamente pelas migrations do Flyway em:
 src/main/resources/db/migration
 ```
 
-O Flyway roda em um container dedicado e monta esse diretório como `/flyway/sql`.
+O Flyway roda em um container dedicado, usando a imagem `flyway/flyway:9.22.3`, e monta esse diretório como `/flyway/sql`.
+Execute as migrations antes de iniciar a aplicação:
+
+```powershell
+docker compose run --rm flyway migrate
+```
+
 A aplicação Spring Boot não executa migrations ao iniciar; ela apenas valida o schema com:
 
 ```properties
@@ -65,7 +71,34 @@ Para o container Flyway acessar Oracle, coloque o driver JDBC em:
 docker/flyway/drivers/ojdbc11.jar
 ```
 
+O Compose monta somente esse arquivo em `/flyway/drivers/ojdbc11.jar`.
+Nao monte a pasta inteira em `/flyway/drivers`, porque isso pode ocultar jars internos da imagem do Flyway.
+Sem esse arquivo, o Flyway container não consegue abrir conexão JDBC com Oracle.
+
 Novas alterações de banco devem ser adicionadas como novos arquivos `V__*.sql`.
+
+Se o Flyway falhar com:
+
+```text
+No database found to handle jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+```
+
+verifique se o `docker-compose.yml` está usando a imagem `flyway/flyway:9.22.3`.
+Imagens Flyway 10+ modularizam o suporte a bancos e podem exigir módulos extras para Oracle.
+
+Se a aplicação falhar com uma mensagem parecida com:
+
+```text
+Schema validation: missing table [reservation_slots]
+```
+
+isso significa que a aplicação conectou no Oracle, mas as migrations ainda não foram aplicadas nesse banco.
+Execute o container do Flyway e tente iniciar a aplicação novamente:
+
+```powershell
+docker compose run --rm flyway migrate
+.\gradlew.bat bootRun
+```
 
 ## Executar a aplicação
 
