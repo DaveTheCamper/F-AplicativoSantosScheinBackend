@@ -5,20 +5,17 @@ import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
 import br.com.santosschein.complexo.interfaces.dto.request.RegisterUserRequest;
 import br.com.santosschein.complexo.shared.exception.UserAlreadyExistsException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class RegisterUserUseCase {
 
     private final UserRepository userRepository;
     private final PasswordService passwordService;
-
-    public RegisterUserUseCase(UserRepository userRepository, PasswordService passwordService) {
-        this.userRepository = userRepository;
-        this.passwordService = passwordService;
-    }
 
     public void execute(RegisterUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {

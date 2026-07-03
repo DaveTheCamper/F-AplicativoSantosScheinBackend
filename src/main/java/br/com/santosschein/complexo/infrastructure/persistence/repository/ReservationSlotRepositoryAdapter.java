@@ -3,6 +3,7 @@ package br.com.santosschein.complexo.infrastructure.persistence.repository;
 import br.com.santosschein.complexo.domain.model.ReservationSlot;
 import br.com.santosschein.complexo.domain.repository.ReservationSlotRepository;
 import br.com.santosschein.complexo.infrastructure.persistence.mapper.ReservationSlotPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -10,14 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class ReservationSlotRepositoryAdapter implements ReservationSlotRepository {
 
     private final JpaReservationSlotRepository jpaReservationSlotRepository;
     private final ReservationSlotPersistenceMapper mapper = new ReservationSlotPersistenceMapper();
-
-    public ReservationSlotRepositoryAdapter(JpaReservationSlotRepository jpaReservationSlotRepository) {
-        this.jpaReservationSlotRepository = jpaReservationSlotRepository;
-    }
 
     @Override
     public Optional<ReservationSlot> findById(Long id) {

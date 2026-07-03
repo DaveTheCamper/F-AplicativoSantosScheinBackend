@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
@@ -26,16 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
     private final ApiErrorResponseWriter apiErrorResponseWriter;
-
-    public JwtAuthenticationFilter(
-            TokenService tokenService,
-            UserDetailsService userDetailsService,
-            ApiErrorResponseWriter apiErrorResponseWriter
-    ) {
-        this.tokenService = tokenService;
-        this.userDetailsService = userDetailsService;
-        this.apiErrorResponseWriter = apiErrorResponseWriter;
-    }
 
     @Override
     protected void doFilterInternal(

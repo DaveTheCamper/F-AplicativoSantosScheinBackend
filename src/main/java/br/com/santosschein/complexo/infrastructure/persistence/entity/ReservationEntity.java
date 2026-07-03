@@ -14,6 +14,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +39,8 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_reservations_slot_date", columnList = "slot_id, reservation_date")
         }
 )
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationEntity {
 
     @Id
@@ -76,9 +81,6 @@ public class ReservationEntity {
     @Column(name = "active_slot_id", insertable = false, updatable = false)
     private Long activeSlotId;
 
-    protected ReservationEntity() {
-    }
-
     public ReservationEntity(
             Long id,
             UserEntity user,
@@ -97,49 +99,5 @@ public class ReservationEntity {
         this.status = status;
         this.createdAt = createdAt;
         this.canceledAt = canceledAt;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
-    public SoccerFieldEntity getField() {
-        return field;
-    }
-
-    public ReservationSlotEntity getSlot() {
-        return slot;
-    }
-
-    public LocalDate getReservationDate() {
-        return reservationDate;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getCanceledAt() {
-        return canceledAt;
-    }
-
-    public Long getActiveFieldId() {
-        return activeFieldId;
-    }
-
-    public LocalDate getActiveReservationDate() {
-        return activeReservationDate;
-    }
-
-    public Long getActiveSlotId() {
-        return activeSlotId;
     }
 }

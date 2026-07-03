@@ -13,6 +13,7 @@ import br.com.santosschein.complexo.interfaces.dto.response.ReservationResponse;
 import br.com.santosschein.complexo.shared.exception.BusinessException;
 import br.com.santosschein.complexo.shared.exception.InvalidCredentialsException;
 import br.com.santosschein.complexo.shared.exception.ReservationUnavailableException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class CreateReservationUseCase {
 
     private static final String SLOT_ID_PREFIX = "slot_";
@@ -31,20 +33,6 @@ public class CreateReservationUseCase {
     private final ReservationRepository reservationRepository;
     private final ReservationResponseMapper reservationResponseMapper;
     private final Clock clock;
-
-    public CreateReservationUseCase(
-            UserRepository userRepository,
-            ReservationSlotRepository reservationSlotRepository,
-            ReservationRepository reservationRepository,
-            ReservationResponseMapper reservationResponseMapper,
-            Clock clock
-    ) {
-        this.userRepository = userRepository;
-        this.reservationSlotRepository = reservationSlotRepository;
-        this.reservationRepository = reservationRepository;
-        this.reservationResponseMapper = reservationResponseMapper;
-        this.clock = clock;
-    }
 
     @Transactional
     public ReservationResponse execute(Long authenticatedUserId, CreateReservationRequest request) {

@@ -7,6 +7,7 @@ import br.com.santosschein.complexo.shared.exception.BusinessException;
 import br.com.santosschein.complexo.shared.exception.ForbiddenOperationException;
 import br.com.santosschein.complexo.shared.exception.ReservationUnavailableException;
 import br.com.santosschein.complexo.shared.exception.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class CancelReservationUseCase {
 
     private static final String RESERVATION_ID_PREFIX = "res_";
@@ -21,11 +23,6 @@ public class CancelReservationUseCase {
 
     private final ReservationRepository reservationRepository;
     private final Clock clock;
-
-    public CancelReservationUseCase(ReservationRepository reservationRepository, Clock clock) {
-        this.reservationRepository = reservationRepository;
-        this.clock = clock;
-    }
 
     @Transactional
     public void execute(Long authenticatedUserId, String reservationId) {

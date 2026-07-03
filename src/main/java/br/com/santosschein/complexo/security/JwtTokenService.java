@@ -5,6 +5,7 @@ import br.com.santosschein.complexo.infrastructure.config.AppProperties;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -15,13 +16,10 @@ import java.time.Instant;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class JwtTokenService implements TokenService {
 
     private final AppProperties appProperties;
-
-    public JwtTokenService(AppProperties appProperties) {
-        this.appProperties = appProperties;
-    }
 
     @Override
     public String generateAccessToken(Long userId, String email) {

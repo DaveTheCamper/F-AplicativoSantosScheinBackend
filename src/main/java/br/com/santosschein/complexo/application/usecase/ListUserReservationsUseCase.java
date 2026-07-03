@@ -5,6 +5,7 @@ import br.com.santosschein.complexo.domain.model.Reservation;
 import br.com.santosschein.complexo.domain.repository.ReservationRepository;
 import br.com.santosschein.complexo.interfaces.dto.response.ReservationsResponse;
 import br.com.santosschein.complexo.shared.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -13,6 +14,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ListUserReservationsUseCase {
 
     private static final String UPCOMING = "upcoming";
@@ -21,16 +23,6 @@ public class ListUserReservationsUseCase {
     private final ReservationRepository reservationRepository;
     private final ReservationResponseMapper reservationResponseMapper;
     private final Clock clock;
-
-    public ListUserReservationsUseCase(
-            ReservationRepository reservationRepository,
-            ReservationResponseMapper reservationResponseMapper,
-            Clock clock
-    ) {
-        this.reservationRepository = reservationRepository;
-        this.reservationResponseMapper = reservationResponseMapper;
-        this.clock = clock;
-    }
 
     public ReservationsResponse execute(Long authenticatedUserId, String status) {
         LocalDate currentDate = LocalDate.now(clock);

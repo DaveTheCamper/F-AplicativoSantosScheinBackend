@@ -4,6 +4,7 @@ import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
 import br.com.santosschein.complexo.interfaces.dto.response.UserProfileResponse;
 import br.com.santosschein.complexo.shared.exception.InvalidCredentialsException;
+import br.com.santosschein.complexo.testsupport.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,7 @@ class GetAuthenticatedUserProfileUseCaseTest {
 
     @Test
     void returnsAuthenticatedUserProfile() {
-        User user = user();
+        User user = TestDataFactory.user(123L);
         when(userRepository.findById(user.id())).thenReturn(Optional.of(user));
 
         UserProfileResponse response = useCase.execute(user.id());
@@ -43,6 +44,13 @@ class GetAuthenticatedUserProfileUseCaseTest {
     }
 
     @Test
+    void profileResponseDoesNotExposePasswordOrHash() {
+        assertThat(UserProfileResponse.class.getRecordComponents())
+                .extracting(component -> component.getName())
+                .doesNotContain("password", "passwordHash", "hash");
+    }
+
+    @Test
     void rejectsProfileWhenAuthenticatedUserDoesNotExist() {
         when(userRepository.findById(123L)).thenReturn(Optional.empty());
 
@@ -50,18 +58,4 @@ class GetAuthenticatedUserProfileUseCaseTest {
                 .isInstanceOf(InvalidCredentialsException.class);
     }
 
-    private User user() {
-        LocalDateTime now = LocalDateTime.now();
-        return new User(
-                123L,
-                "Joao",
-                "Silva",
-                LocalDate.of(1995, 4, 20),
-                "12345678900",
-                "joao@email.com",
-                "$2a$hash",
-                now,
-                now
-        );
-    }
 }

@@ -8,6 +8,7 @@ import br.com.santosschein.complexo.infrastructure.persistence.entity.SoccerFiel
 import br.com.santosschein.complexo.infrastructure.persistence.entity.UserEntity;
 import br.com.santosschein.complexo.infrastructure.persistence.mapper.ReservationPersistenceMapper;
 import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class ReservationRepositoryAdapter implements ReservationRepository {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
@@ -24,11 +26,6 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
     private final EntityManager entityManager;
     private final ReservationPersistenceMapper mapper = new ReservationPersistenceMapper();
-
-    public ReservationRepositoryAdapter(JpaReservationRepository jpaReservationRepository, EntityManager entityManager) {
-        this.jpaReservationRepository = jpaReservationRepository;
-        this.entityManager = entityManager;
-    }
 
     @Override
     public Optional<Reservation> findNextActiveReservation(Long userId, LocalDate currentDate, LocalTime currentTime) {

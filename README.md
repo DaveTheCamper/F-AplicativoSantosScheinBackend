@@ -11,9 +11,10 @@ Backend Java com Spring Boot para o aplicativo Android do Complexo Esportivo San
 - Spring Security
 - Spring Data JPA
 - Oracle JDBC Driver
-- Flyway
+- Flyway via Docker
 - Bean Validation
 - JWT
+- Lombok
 - JUnit 5
 - Mockito
 
@@ -34,7 +35,7 @@ src/main/java/br/com/santosschein/complexo
 Na raiz do projeto:
 
 ```powershell
-docker compose up -d
+docker compose up oracle flyway
 ```
 
 O banco fica disponível em:
@@ -50,6 +51,21 @@ As tabelas são criadas exclusivamente pelas migrations do Flyway em:
 ```text
 src/main/resources/db/migration
 ```
+
+O Flyway roda em um container dedicado e monta esse diretório como `/flyway/sql`.
+A aplicação Spring Boot não executa migrations ao iniciar; ela apenas valida o schema com:
+
+```properties
+spring.jpa.hibernate.ddl-auto=validate
+```
+
+Para o container Flyway acessar Oracle, coloque o driver JDBC em:
+
+```text
+docker/flyway/drivers/ojdbc11.jar
+```
+
+Novas alterações de banco devem ser adicionadas como novos arquivos `V__*.sql`.
 
 ## Executar a aplicação
 
@@ -84,24 +100,26 @@ Nesta etapa inicial os testes são unitários e não dependem do Oracle.
 Endpoint técnico inicial:
 
 ```http
-GET http://localhost:8080/api/health
+GET http://localhost:8080/api/v1/health
 ```
 
-Endpoints planejados para as próximas etapas:
+Endpoints principais:
 
 ```http
-POST /auth/register
-POST /auth/login
-GET  /api/users/me
-GET  /api/reservations/me/next
-GET  /api/reservations/available-days?year=2026&month=7
-GET  /api/reservations/available-times?date=2026-07-10
-POST /api/reservations
-GET  /api/reservations/me?type=UPCOMING
-PATCH /api/reservations/{reservationId}/cancel
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+GET    /api/v1/users/me
+GET    /api/v1/reservations/available-days?year=2026&month=7
+GET    /api/v1/reservations/available-slots?date=2026-07-10
+POST   /api/v1/reservations
+GET    /api/v1/users/me/reservations/next
+GET    /api/v1/users/me/reservations?status=upcoming
+GET    /api/v1/users/me/reservations?status=past
+DELETE /api/v1/users/me/reservations/{reservationId}
+GET    /api/v1/health
 ```
 
-Login e registro serão públicos. Os demais endpoints serão protegidos por JWT no header:
+Login e registro são públicos. Os demais endpoints são protegidos por JWT no header:
 
 ```http
 Authorization: Bearer <token>

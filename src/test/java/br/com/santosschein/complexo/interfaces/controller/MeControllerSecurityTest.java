@@ -35,12 +35,23 @@ class MeControllerSecurityTest {
 
     @Test
     void returnsUnauthorizedWhenRequestHasNoAuthentication() throws Exception {
-        mockMvc.perform(get("/me/profile"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized"))
                 .andExpect(jsonPath("$.message").value("Sessao expirada ou token invalido."))
-                .andExpect(jsonPath("$.path").value("/me/profile"))
+                .andExpect(jsonPath("$.path").value("/api/v1/users/me"))
                 .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void returnsUnauthorizedWhenRequestHasInvalidToken() throws Exception {
+        mockMvc.perform(get("/api/v1/users/me")
+                        .header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Sessao expirada ou token invalido."))
+                .andExpect(jsonPath("$.path").value("/api/v1/users/me"));
     }
 }

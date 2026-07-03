@@ -6,24 +6,16 @@ import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
 import br.com.santosschein.complexo.interfaces.dto.request.LoginRequest;
 import br.com.santosschein.complexo.shared.exception.InvalidCredentialsException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LoginUseCase {
 
     private final UserRepository userRepository;
     private final PasswordService passwordService;
     private final TokenService tokenService;
-
-    public LoginUseCase(
-            UserRepository userRepository,
-            PasswordService passwordService,
-            TokenService tokenService
-    ) {
-        this.userRepository = userRepository;
-        this.passwordService = passwordService;
-        this.tokenService = tokenService;
-    }
 
     public String execute(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())

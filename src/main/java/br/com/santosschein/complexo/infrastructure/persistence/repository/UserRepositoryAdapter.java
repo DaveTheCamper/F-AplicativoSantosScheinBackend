@@ -3,19 +3,17 @@ package br.com.santosschein.complexo.infrastructure.persistence.repository;
 import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
 import br.com.santosschein.complexo.infrastructure.persistence.mapper.UserPersistenceMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class UserRepositoryAdapter implements UserRepository {
 
     private final JpaUserRepository jpaUserRepository;
     private final UserPersistenceMapper mapper = new UserPersistenceMapper();
-
-    public UserRepositoryAdapter(JpaUserRepository jpaUserRepository) {
-        this.jpaUserRepository = jpaUserRepository;
-    }
 
     @Override
     public Optional<User> findById(Long id) {

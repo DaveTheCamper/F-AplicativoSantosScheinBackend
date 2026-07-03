@@ -8,6 +8,7 @@ import br.com.santosschein.complexo.interfaces.dto.response.AvailableDaysRespons
 import br.com.santosschein.complexo.interfaces.dto.response.AvailableSlotsResponse;
 import br.com.santosschein.complexo.interfaces.dto.response.ReservationResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import br.com.santosschein.complexo.security.AuthenticatedUser;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,22 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping("/api/v1/reservations")
+@RequiredArgsConstructor
 public class ReservationAvailabilityController {
 
     private final CreateReservationUseCase createReservationUseCase;
     private final GetAvailableDaysUseCase getAvailableDaysUseCase;
     private final GetAvailableSlotsUseCase getAvailableSlotsUseCase;
-
-    public ReservationAvailabilityController(
-            CreateReservationUseCase createReservationUseCase,
-            GetAvailableDaysUseCase getAvailableDaysUseCase,
-            GetAvailableSlotsUseCase getAvailableSlotsUseCase
-    ) {
-        this.createReservationUseCase = createReservationUseCase;
-        this.getAvailableDaysUseCase = getAvailableDaysUseCase;
-        this.getAvailableSlotsUseCase = getAvailableSlotsUseCase;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -6,6 +6,7 @@ import br.com.santosschein.complexo.application.usecase.ListUserReservationsUseC
 import br.com.santosschein.complexo.interfaces.dto.response.ReservationResponse;
 import br.com.santosschein.complexo.interfaces.dto.response.ReservationsResponse;
 import br.com.santosschein.complexo.security.AuthenticatedUser;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,22 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/me/reservations")
+@RequestMapping("/api/v1/users/me/reservations")
+@RequiredArgsConstructor
 public class MeReservationsController {
 
     private final GetNextReservationUseCase getNextReservationUseCase;
     private final ListUserReservationsUseCase listUserReservationsUseCase;
     private final CancelReservationUseCase cancelReservationUseCase;
-
-    public MeReservationsController(
-            GetNextReservationUseCase getNextReservationUseCase,
-            ListUserReservationsUseCase listUserReservationsUseCase,
-            CancelReservationUseCase cancelReservationUseCase
-    ) {
-        this.getNextReservationUseCase = getNextReservationUseCase;
-        this.listUserReservationsUseCase = listUserReservationsUseCase;
-        this.cancelReservationUseCase = cancelReservationUseCase;
-    }
 
     @GetMapping("/next")
     public ResponseEntity<ReservationResponse> next(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {

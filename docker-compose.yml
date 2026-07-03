@@ -17,5 +17,21 @@ services:
       retries: 10
       start_period: 40s
 
+  flyway:
+    image: redgate/flyway:10
+    container_name: complexo-santos-schein-flyway
+    depends_on:
+      oracle:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      FLYWAY_USER: complexo
+      FLYWAY_PASSWORD: complexo
+      FLYWAY_CONNECT_RETRIES: 60
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql:ro
+      - ./docker/flyway/drivers:/flyway/drivers:ro
+    command: migrate
+
 volumes:
   oracle-data:

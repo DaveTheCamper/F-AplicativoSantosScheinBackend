@@ -3,6 +3,7 @@ package br.com.santosschein.complexo.application.usecase;
 import br.com.santosschein.complexo.domain.repository.ReservationSlotRepository;
 import br.com.santosschein.complexo.interfaces.dto.response.AvailableDaysResponse;
 import br.com.santosschein.complexo.shared.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.DateTimeException;
@@ -11,16 +12,13 @@ import java.time.YearMonth;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GetAvailableDaysUseCase {
 
     private static final int MIN_YEAR = 1;
     private static final int MAX_YEAR = 9999;
 
     private final ReservationSlotRepository reservationSlotRepository;
-
-    public GetAvailableDaysUseCase(ReservationSlotRepository reservationSlotRepository) {
-        this.reservationSlotRepository = reservationSlotRepository;
-    }
 
     public AvailableDaysResponse execute(Integer year, Integer month) {
         YearMonth yearMonth = validateAndCreateYearMonth(year, month);

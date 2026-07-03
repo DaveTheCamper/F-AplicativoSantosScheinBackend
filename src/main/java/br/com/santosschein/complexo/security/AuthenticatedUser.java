@@ -2,21 +2,17 @@ package br.com.santosschein.complexo.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class AuthenticatedUser implements UserDetails {
 
     private final Long id;
     private final String email;
     private final String passwordHash;
-
-    public AuthenticatedUser(Long id, String email, String passwordHash) {
-        this.id = id;
-        this.email = email;
-        this.passwordHash = passwordHash;
-    }
 
     public Long id() {
         return id;
