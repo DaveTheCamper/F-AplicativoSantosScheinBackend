@@ -18,4 +18,16 @@ class JpaReservationSlotRepositoryTest {
         assertThat(source).contains("r.status = 'ACTIVE'");
         assertThat(source).doesNotContain("r.status <> 'CANCELED'");
     }
+
+    @Test
+    void firstAvailableEquivalentSlotQueryChoosesFirstActiveAvailableField() throws Exception {
+        String source = Files.readString(Path.of(
+                "src/main/java/br/com/santosschein/complexo/infrastructure/persistence/repository/JpaReservationSlotRepository.java"
+        ));
+
+        assertThat(source).contains("findFirstAvailableEquivalentSlot");
+        assertThat(source).contains("candidate_sf.active = 1");
+        assertThat(source).contains("ORDER BY candidate_sf.id ASC, candidate_sf.name ASC");
+        assertThat(source).contains("FETCH FIRST 1 ROWS ONLY");
+    }
 }

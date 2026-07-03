@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaReservationSlotRepository extends JpaRepository<ReservationSlotEntity, Long> {
 
@@ -68,4 +69,35 @@ public interface JpaReservationSlotRepository extends JpaRepository<ReservationS
             nativeQuery = true
     )
     List<ReservationSlotEntity> findAvailableSlotsByDate(@Param("reservationDate") LocalDate reservationDate);
+
+    @Query(
+            value = """
+                    SELECT candidate_rs.*
+                    FROM reservation_slots requested_rs
+                    JOIN reservation_slots candidate_rs
+                      ON candidate_rs.start_time = requested_rs.start_time
+                     AND candidate_rs.end_time = requested_rs.end_time
+                     AND candidate_rs.price = requested_rs.price
+                    JOIN soccer_fields candidate_sf ON candidate_sf.id = candidate_rs.field_id
+                    WHERE requested_rs.id = :slotId
+                      AND requested_rs.active = 1
+                      AND candidate_rs.active = 1
+                      AND candidate_sf.active = 1
+                      AND NOT EXISTS (
+                          SELECT 1
+                          FROM reservations r
+                          WHERE r.field_id = candidate_rs.field_id
+                            AND r.slot_id = candidate_rs.id
+                            AND TRUNC(r.reservation_date) = TRUNC(:reservationDate)
+                            AND r.status = 'ACTIVE'
+                      )
+                    ORDER BY candidate_sf.id ASC, candidate_sf.name ASC
+                    FETCH FIRST 1 ROWS ONLY
+                    """,
+            nativeQuery = true
+    )
+    Optional<ReservationSlotEntity> findFirstAvailableEquivalentSlot(
+            @Param("slotId") Long slotId,
+            @Param("reservationDate") LocalDate reservationDate
+    );
 }

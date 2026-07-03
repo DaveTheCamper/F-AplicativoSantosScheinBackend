@@ -13,4 +13,6 @@ public interface ReservationSlotRepository {
     List<LocalDate> findAvailableDaysBetween(LocalDate monthStart, LocalDate monthEnd);
 
     List<ReservationSlot> findAvailableSlotsByDate(LocalDate reservationDate);
+
+    Optional<ReservationSlot> findFirstAvailableEquivalentSlot(Long slotId, LocalDate reservationDate);
 }

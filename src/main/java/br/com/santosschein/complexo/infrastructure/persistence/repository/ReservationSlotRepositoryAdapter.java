@@ -36,4 +36,10 @@ public class ReservationSlotRepositoryAdapter implements ReservationSlotReposito
                 .map(mapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public Optional<ReservationSlot> findFirstAvailableEquivalentSlot(Long slotId, LocalDate reservationDate) {
+        return jpaReservationSlotRepository.findFirstAvailableEquivalentSlot(slotId, reservationDate)
+                .map(mapper::toDomain);
+    }
 }

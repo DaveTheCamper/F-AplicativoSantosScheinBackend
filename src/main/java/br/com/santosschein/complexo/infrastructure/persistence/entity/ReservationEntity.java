@@ -79,6 +79,26 @@ public class ReservationEntity {
     protected ReservationEntity() {
     }
 
+    public ReservationEntity(
+            Long id,
+            UserEntity user,
+            SoccerFieldEntity field,
+            ReservationSlotEntity slot,
+            LocalDate reservationDate,
+            ReservationStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime canceledAt
+    ) {
+        this.id = id;
+        this.user = user;
+        this.field = field;
+        this.slot = slot;
+        this.reservationDate = reservationDate;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.canceledAt = canceledAt;
+    }
+
     public Long getId() {
         return id;
     }

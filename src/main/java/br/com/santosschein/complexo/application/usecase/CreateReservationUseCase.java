@@ -1,0 +1,113 @@
+package br.com.santosschein.complexo.application.usecase;
+
+import br.com.santosschein.complexo.domain.model.Reservation;
+import br.com.santosschein.complexo.domain.model.ReservationSlot;
+import br.com.santosschein.complexo.domain.model.ReservationStatus;
+import br.com.santosschein.complexo.domain.model.User;
+import br.com.santosschein.complexo.domain.repository.ReservationRepository;
+import br.com.santosschein.complexo.domain.repository.ReservationSlotRepository;
+import br.com.santosschein.complexo.domain.repository.UserRepository;
+import br.com.santosschein.complexo.interfaces.dto.request.CreateReservationRequest;
+import br.com.santosschein.complexo.interfaces.dto.response.ReservationResponse;
+import br.com.santosschein.complexo.shared.exception.BusinessException;
+import br.com.santosschein.complexo.shared.exception.InvalidCredentialsException;
+import br.com.santosschein.complexo.shared.exception.ReservationUnavailableException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Service
+public class CreateReservationUseCase {
+
+    private static final String SLOT_ID_PREFIX = "slot_";
+
+    private final UserRepository userRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
+    private final ReservationRepository reservationRepository;
+    private final Clock clock;
+
+    public CreateReservationUseCase(
+            UserRepository userRepository,
+            ReservationSlotRepository reservationSlotRepository,
+            ReservationRepository reservationRepository,
+            Clock clock
+    ) {
+        this.userRepository = userRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
+        this.reservationRepository = reservationRepository;
+        this.clock = clock;
+    }
+
+    @Transactional
+    public ReservationResponse execute(Long authenticatedUserId, CreateReservationRequest request) {
+        if (request.date() == null) {
+            throw new BusinessException("Data invalida.");
+        }
+
+        LocalDate today = LocalDate.now(clock);
+        if (request.date().isBefore(today)) {
+            throw new BusinessException("Nao e permitido criar reserva em data passada.");
+        }
+
+        Long requestedSlotId = parseSlotId(request.slotId());
+        ReservationSlot requestedSlot = reservationSlotRepository.findById(requestedSlotId)
+                .filter(ReservationSlot::active)
+                .orElseThrow(() -> new ReservationUnavailableException("Horario indisponivel."));
+
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(InvalidCredentialsException::new);
+
+        ReservationSlot availableSlot = reservationSlotRepository
+                .findFirstAvailableEquivalentSlot(requestedSlot.id(), request.date())
+                .orElseThrow(() -> new ReservationUnavailableException("Horario indisponivel."));
+
+        Reservation reservation = new Reservation(
+                null,
+                user,
+                availableSlot.field(),
+                availableSlot,
+                request.date(),
+                ReservationStatus.ACTIVE,
+                LocalDateTime.now(clock),
+                null
+        );
+
+        try {
+            return toResponse(reservationRepository.save(reservation));
+        } catch (DataIntegrityViolationException exception) {
+            throw new ReservationUnavailableException("Horario indisponivel.");
+        }
+    }
+
+    private Long parseSlotId(String slotId) {
+        if (slotId == null || slotId.isBlank()) {
+            throw new BusinessException("Slot invalido.");
+        }
+
+        if (!slotId.startsWith(SLOT_ID_PREFIX)) {
+            throw new BusinessException("Slot invalido.");
+        }
+
+        try {
+            return Long.valueOf(slotId.substring(SLOT_ID_PREFIX.length()));
+        } catch (NumberFormatException exception) {
+            throw new BusinessException("Slot invalido.");
+        }
+    }
+
+    private ReservationResponse toResponse(Reservation reservation) {
+        return new ReservationResponse(
+                "res_" + reservation.id(),
+                reservation.field().name(),
+                reservation.reservationDate(),
+                reservation.slot().startTime(),
+                reservation.slot().endTime(),
+                reservation.slot().price(),
+                reservation.status()
+        );
+    }
+}
