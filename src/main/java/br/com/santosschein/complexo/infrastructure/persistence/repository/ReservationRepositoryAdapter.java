@@ -11,11 +11,15 @@ import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class ReservationRepositoryAdapter implements ReservationRepository {
+
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     private final JpaReservationRepository jpaReservationRepository;
     private final EntityManager entityManager;
@@ -27,21 +31,33 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findNextActiveReservation(Long userId, LocalDate fromDate) {
-        return jpaReservationRepository.findNextActiveReservation(userId, fromDate).map(mapper::toDomain);
+    public Optional<Reservation> findNextActiveReservation(Long userId, LocalDate currentDate, LocalTime currentTime) {
+        return jpaReservationRepository.findNextActiveReservation(
+                userId,
+                currentDate,
+                currentTime.format(TIME_FORMATTER)
+        ).map(mapper::toDomain);
     }
 
     @Override
-    public List<Reservation> findFutureReservationsByUser(Long userId, LocalDate fromDate) {
-        return jpaReservationRepository.findFutureReservationsByUser(userId, fromDate)
+    public List<Reservation> findFutureReservationsByUser(Long userId, LocalDate currentDate, LocalTime currentTime) {
+        return jpaReservationRepository.findFutureReservationsByUser(
+                        userId,
+                        currentDate,
+                        currentTime.format(TIME_FORMATTER)
+                )
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
     }
 
     @Override
-    public List<Reservation> findPastReservationsByUser(Long userId, LocalDate beforeDate) {
-        return jpaReservationRepository.findPastReservationsByUser(userId, beforeDate)
+    public List<Reservation> findPastReservationsByUser(Long userId, LocalDate currentDate, LocalTime currentTime) {
+        return jpaReservationRepository.findPastReservationsByUser(
+                        userId,
+                        currentDate,
+                        currentTime.format(TIME_FORMATTER)
+                )
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
@@ -65,6 +81,11 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
                 reservationDate,
                 status
         );
+    }
+
+    @Override
+    public Optional<Reservation> findById(Long reservationId) {
+        return jpaReservationRepository.findById(reservationId).map(mapper::toDomain);
     }
 
     @Override

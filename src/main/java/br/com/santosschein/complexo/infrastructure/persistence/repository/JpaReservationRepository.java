@@ -19,7 +19,13 @@ public interface JpaReservationRepository extends JpaRepository<ReservationEntit
                     JOIN reservation_slots rs ON rs.id = r.slot_id
                     WHERE r.user_id = :userId
                       AND r.status = 'ACTIVE'
-                      AND TRUNC(r.reservation_date) >= TRUNC(:fromDate)
+                      AND (
+                          TRUNC(r.reservation_date) > TRUNC(:currentDate)
+                          OR (
+                              TRUNC(r.reservation_date) = TRUNC(:currentDate)
+                              AND rs.start_time > :currentTime
+                          )
+                      )
                     ORDER BY r.reservation_date ASC, rs.start_time ASC
                     FETCH FIRST 1 ROWS ONLY
                     """,
@@ -27,32 +33,55 @@ public interface JpaReservationRepository extends JpaRepository<ReservationEntit
     )
     Optional<ReservationEntity> findNextActiveReservation(
             @Param("userId") Long userId,
-            @Param("fromDate") LocalDate fromDate
+            @Param("currentDate") LocalDate currentDate,
+            @Param("currentTime") String currentTime
     );
 
-    @Query("""
-            SELECT r
-            FROM ReservationEntity r
-            WHERE r.user.id = :userId
-              AND r.status = br.com.santosschein.complexo.domain.model.ReservationStatus.ACTIVE
-              AND r.reservationDate >= :fromDate
-            ORDER BY r.reservationDate ASC, r.slot.startTime ASC
-            """)
+    @Query(
+            value = """
+                    SELECT r.*
+                    FROM reservations r
+                    JOIN reservation_slots rs ON rs.id = r.slot_id
+                    WHERE r.user_id = :userId
+                      AND r.status = 'ACTIVE'
+                      AND (
+                          TRUNC(r.reservation_date) > TRUNC(:currentDate)
+                          OR (
+                              TRUNC(r.reservation_date) = TRUNC(:currentDate)
+                              AND rs.start_time > :currentTime
+                          )
+                      )
+                    ORDER BY r.reservation_date ASC, rs.start_time ASC
+                    """,
+            nativeQuery = true
+    )
     List<ReservationEntity> findFutureReservationsByUser(
             @Param("userId") Long userId,
-            @Param("fromDate") LocalDate fromDate
+            @Param("currentDate") LocalDate currentDate,
+            @Param("currentTime") String currentTime
     );
 
-    @Query("""
-            SELECT r
-            FROM ReservationEntity r
-            WHERE r.user.id = :userId
-              AND r.reservationDate < :beforeDate
-            ORDER BY r.reservationDate DESC, r.slot.startTime DESC
-            """)
+    @Query(
+            value = """
+                    SELECT r.*
+                    FROM reservations r
+                    JOIN reservation_slots rs ON rs.id = r.slot_id
+                    WHERE r.user_id = :userId
+                      AND (
+                          TRUNC(r.reservation_date) < TRUNC(:currentDate)
+                          OR (
+                              TRUNC(r.reservation_date) = TRUNC(:currentDate)
+                              AND rs.start_time < :currentTime
+                          )
+                      )
+                    ORDER BY r.reservation_date DESC, rs.start_time DESC
+                    """,
+            nativeQuery = true
+    )
     List<ReservationEntity> findPastReservationsByUser(
             @Param("userId") Long userId,
-            @Param("beforeDate") LocalDate beforeDate
+            @Param("currentDate") LocalDate currentDate,
+            @Param("currentTime") String currentTime
     );
 
     @Query(

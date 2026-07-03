@@ -7,6 +7,7 @@ import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.ReservationRepository;
 import br.com.santosschein.complexo.domain.repository.ReservationSlotRepository;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
+import br.com.santosschein.complexo.application.service.ReservationResponseMapper;
 import br.com.santosschein.complexo.interfaces.dto.request.CreateReservationRequest;
 import br.com.santosschein.complexo.interfaces.dto.response.ReservationResponse;
 import br.com.santosschein.complexo.shared.exception.BusinessException;
@@ -28,17 +29,20 @@ public class CreateReservationUseCase {
     private final UserRepository userRepository;
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationResponseMapper reservationResponseMapper;
     private final Clock clock;
 
     public CreateReservationUseCase(
             UserRepository userRepository,
             ReservationSlotRepository reservationSlotRepository,
             ReservationRepository reservationRepository,
+            ReservationResponseMapper reservationResponseMapper,
             Clock clock
     ) {
         this.userRepository = userRepository;
         this.reservationSlotRepository = reservationSlotRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationResponseMapper = reservationResponseMapper;
         this.clock = clock;
     }
 
@@ -77,7 +81,7 @@ public class CreateReservationUseCase {
         );
 
         try {
-            return toResponse(reservationRepository.save(reservation));
+            return reservationResponseMapper.toResponse(reservationRepository.save(reservation));
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationUnavailableException("Horario indisponivel.");
         }
@@ -99,15 +103,4 @@ public class CreateReservationUseCase {
         }
     }
 
-    private ReservationResponse toResponse(Reservation reservation) {
-        return new ReservationResponse(
-                "res_" + reservation.id(),
-                reservation.field().name(),
-                reservation.reservationDate(),
-                reservation.slot().startTime(),
-                reservation.slot().endTime(),
-                reservation.slot().price(),
-                reservation.status()
-        );
-    }
 }

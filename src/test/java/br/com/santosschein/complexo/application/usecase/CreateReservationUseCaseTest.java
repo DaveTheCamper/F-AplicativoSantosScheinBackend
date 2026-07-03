@@ -8,6 +8,7 @@ import br.com.santosschein.complexo.domain.model.User;
 import br.com.santosschein.complexo.domain.repository.ReservationRepository;
 import br.com.santosschein.complexo.domain.repository.ReservationSlotRepository;
 import br.com.santosschein.complexo.domain.repository.UserRepository;
+import br.com.santosschein.complexo.application.service.ReservationResponseMapper;
 import br.com.santosschein.complexo.interfaces.dto.request.CreateReservationRequest;
 import br.com.santosschein.complexo.shared.exception.BusinessException;
 import br.com.santosschein.complexo.shared.exception.ReservationUnavailableException;
@@ -59,6 +60,7 @@ class CreateReservationUseCaseTest {
                 userRepository,
                 reservationSlotRepository,
                 reservationRepository,
+                new ReservationResponseMapper(),
                 clock
         );
     }
