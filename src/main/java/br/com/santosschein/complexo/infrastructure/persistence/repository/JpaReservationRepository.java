@@ -66,7 +66,9 @@ public interface JpaReservationRepository extends JpaRepository<ReservationEntit
                     WHERE EXISTS (
                         SELECT 1
                         FROM reservation_slots rs
+                        JOIN soccer_fields sf ON sf.id = rs.field_id
                         WHERE rs.active = 1
+                          AND sf.active = 1
                           AND NOT EXISTS (
                               SELECT 1
                               FROM reservations r
